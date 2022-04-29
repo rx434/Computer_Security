@@ -1,23 +1,28 @@
 from object import Message
 
 
-def reference_monitor_initialization(cloud, device, admin):
-    device.subscribe(device, '{}/{}/trusted'.format(admin.userid, device.deviceid), cloud)
-    admin.subscribe(admin, '{}/{}/request'.format(admin.userid, device.deviceid), cloud)
+def reference_monitor_initialization(cloud, subject_list, admin):
+    for subject in subject_list:
+        subject.subscribe(subject, '{}/{}/trusted'.format(admin.id, subject.id), cloud)
+        admin.subscribe(admin, '{}/{}/request'.format(admin.id, subject.id), cloud)
 
 
-def reference_monitor_check(cloud, device, admin, message_owner):
-    message = Message(device, '{}/{}/request'.format(admin.userid, device.deviceid), message_owner)
-    device.publish(message, cloud)
-    request = admin.topic_dic['{}/{}/request'.format(admin.userid, device.deviceid)][-1].content
-    if request in admin.authorized_users:
-        result = 1
-    else:
+def reference_monitor_check(cloud, subject, admin, message_owner):
+    message = Message(subject, '{}/{}/request'.format(admin.id, subject.id), message_owner)
+    subject.publish(message, cloud)
+    request = admin.topic_dic['{}/{}/request'.format(admin.id, subject.id)][-1].content
+
+    subject_group = admin.groups.get(subject, [])
+    request_group = admin.groups.get(request, [])
+
+    if list(set(subject_group) & set(request_group)) == []:
         result = 0
+    else:
+        result = 1
 
-    back_message = Message(admin, '{}/{}/trusted'.format(admin.userid, device.deviceid), result)
+    back_message = Message(admin, '{}/{}/trusted'.format(admin.id, subject.id), result)
     admin.publish(back_message, cloud)
-    trusted = device.topic_dic['{}/{}/trusted'.format(admin.userid, device.deviceid)][-1].content
+    trusted = subject.topic_dic['{}/{}/trusted'.format(admin.id, subject.id)][-1].content
     return trusted
 
 

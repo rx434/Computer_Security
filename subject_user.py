@@ -1,20 +1,43 @@
-class User:
-    def __init__(self, userid):
-        self.userid = userid
-        self.topic_dic = {}
+from object import Message
+from reference_monitor import reference_monitor_check
 
-    def connect(self, user, cloud):
+
+class Subject:
+    def __init__(self, subjectid, admin):
+        self.id = subjectid
+        self.topic_dic = {}
+        self.admin = admin
+        self.will = False
+
+    def connect(self, user, cloud, will_message=False, content=None):
         cloud.handle_user_connect(user)
-        self.connect_cloud = cloud
+        self.connected_cloud = cloud
+        if will_message:
+            self.will = True
+            self.will_message_list = []
+            self.will_message_content = content
+
 
     def subscribe(self, user, topic, cloud):
         cloud.handle_subscribtion(user, topic)
+        if self.will:
+            will_message = Message(self, topic, self.will_message_content)
+            self.will_message_list.append(will_message)
 
-    def publish(self, message, cloud):
-        cloud.handle_publish(message)
+    def publish(self, message, cloud, retained=False):
+        cloud.handle_publish(message, retained)
 
     def receive(self, message):
-        self.topic_dic[message.topic].append(message)
+        if message.owner == self.admin:
+            self.topic_dic[message.topic].append(message)
+        else:
+            trusted = reference_monitor_check(self.connected_cloud, self, self.admin, message.owner)
+            if trusted:
+                self.topic_dic[message.topic].append(message)
+            else:
+                rejected_message = message
+                rejected_message.content = 'You are not allowed to receive this message'
+                self.topic_dic[message.topic].append(rejected_message)
 
     def get_latest_message(self, topic):
         return self.topic_dic[topic][-1].owner, self.topic_dic[topic][-1].topic, self.topic_dic[topic][-1].content
@@ -25,13 +48,30 @@ class User:
             message_list.append( (message.owner, message.topic, message.content,) )
         return message_list
 
-class Admin(User):
-    def __init__(self, userid):
-        User.__init__(self, userid)
-        self.authorized_users = []
+    def accident_disconnect(self, cloud):
+        if self.will:
+            for message in self.will_message_list:
+                self.publish(message, cloud)
 
-    def append_users(self, user):
-        self.authorized_users.append(user)
 
-    def remove_users(self, user):
-        self.authorized_users.remove(user)
+class Admin(Subject):
+    def __init__(self, subjectid):
+        Subject.__init__(self, subjectid, self)
+        self.groups = {}
+
+    def add_user(self, user, group_name):
+        group = self.groups.get(user)
+        if group is None:
+            self.groups[user] = [group_name]
+        else:
+            self.groups[user].append(group_name)
+
+    def remove_user(self, user, group_name):
+        group = self.groups.get(user)
+        group.remove(group_name)
+
+    def remove_user_completely(self, user):
+        return self.groups.pop(user, "Not Found")
+
+    def receive(self, message):
+        self.topic_dic[message.topic].append(message)

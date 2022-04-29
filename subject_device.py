@@ -3,7 +3,7 @@ from reference_monitor import reference_monitor_check
 
 class Device:
     def __init__(self, deviceid, admin):
-        self.deviceid = deviceid
+        self.id = deviceid
         self.topic_dic = {}
         self.admin = admin
 
@@ -14,8 +14,8 @@ class Device:
     def subscribe(self, device, topic, cloud):
         cloud.handle_subscribtion(device, topic)
 
-    def publish(self, message, cloud):
-        cloud.handle_publish(message)
+    def publish(self, message, cloud, retained=False):
+        cloud.handle_publish(message, retained)
 
     def receive(self, message):
         if message.owner == self.admin:
