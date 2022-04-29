@@ -1,0 +1,14 @@
+All of the attacks come from the paper https://ieeexplore.ieee.org/document/9152619
+Attack 1: Will message attack
+How it works: In current MQTT protocol, the users are allowed to publish a will message. When this user is accidentally disconnected from the cloud (for example it doesn't send a DISCONNECT message to the cloud), the cloud will publish the will message to all subscribed subjects of this topic. In this case, an adversary can register a will message to the cloud when he still has the authority. Then when his privilege is revoked, the adversary can purposefully disconnect from the cloud and trigger the will message.
+How to solve it: After the adversary loses its privilege, the admin should remove it from the group immediately. In this case, the reference monitor will find that these will messages don't come from the same group of the devices so that it will block the devices receiving them.
+
+Attack 2: Retained message attack
+How it works: In current MQTT protocol, the users are allowed to publish retained message to a topic. This message will not disappear even if no one subscribe this topic any more. When there are new subjects that subscribe this topic, this retained message will send to these subjects immediately. In this case, an adversary can register a retained message to a topic when he still has the authority. Then waiting until there is a new person subscribing this topic.
+How to solve it: After the adversary loses its privilege, the admin should remove it from the group immediately. In this case, the reference monitor will find that these retained messages don't come from the same group of the devices so that it will block the devices receiving them.
+
+Attack 3: Non-updated session lifecycle state attack
+How it works: There are some flaws in current MQTT protocols. Particularly, when a device is reset by a new user (for removing exusers’ access), although permissions of the ex-user (and his/her client) for accessing the device are revoked (i.e., publish/receive messages through the device’s topic), there is no concept of revoking the permission of a device for accessing its topic. In this case, an adversary can get the topic information of a device though the network analysis when he still has the privilege. Then the adversary can pretend as a device to publish some wrong message to this topic even if his privilege has been revoked, and influence users subscribing to this topic.
+How to solve it: After the adversary loses its privilege, the admin should remove it from the group immediately. In this case, the reference monitor will find that these messages don't come from the same group of the users so that it will block the users receiving them.
+
+Key points: The analysis here bases on an assumption that the clientID is protected very well so that it is very hard for an adversary to fake a clientID of others. I think it is a reasonable and achievable assumption.

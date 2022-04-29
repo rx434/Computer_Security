@@ -34,4 +34,8 @@ conda create -n (your enviornment name) python=3.8
 activate (your enviornment name)
 4. Go to the path of this system and type:
 python test1.py
-then you can see the details of the corresponding test. 
+then you can see the details of the corresponding test.
+
+New Version of this system:
+I improve this system a little bit. One difference is that now all the subjects, no matter it is user or device, use the same class called 'Subject'. As a result, I delete the file of subject_device and change the name of the file 'subject_user.py' as 'subject.py'.
+The second difference is that I change the structure of trusted list into a group. Instead of using trusted list of users, the admin now can put any users and devices into the same group. The logic of the reference monitor also changes: It will check whether the owner of the message is in the same group with the receipt. If so, then the receipt can have the right to receive the message. Otherwise, the message will be blocked.

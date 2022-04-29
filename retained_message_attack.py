@@ -1,5 +1,4 @@
 from server import Cloud
-from subject_device import Device
 from subject_user import Subject, Admin
 from object import Message
 from reference_monitor import reference_monitor_initialization
