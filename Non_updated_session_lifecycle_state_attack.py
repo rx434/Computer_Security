@@ -12,6 +12,12 @@ if __name__ == '__main__':
     user = Subject(3, admin)
     adversary = Subject(4, admin)
     print('Build 1 admin, 1 user, 1 adversary and 2 devices.')
+    print('Build 1 admin, 1 user, 1 adversary and 2 devices.')
+    print('Admin ID:0')
+    print('device1 ID:1')
+    print('device2 ID:2')
+    print('user ID:3')
+    print('adversary ID:4')
 
     print('Connect them to the IoT Cloud:')
     admin.connect(admin, cloud)

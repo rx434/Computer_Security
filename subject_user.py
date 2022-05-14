@@ -28,16 +28,19 @@ class Subject:
         cloud.handle_publish(message, retained)
 
     def receive(self, message):
-        if message.owner == self.admin:
-            self.topic_dic[message.topic].append(message)
-        else:
-            trusted = reference_monitor_check(self.connected_cloud, self, self.admin, message.owner)
-            if trusted:
+        try:
+            if message.owner == self.admin:
                 self.topic_dic[message.topic].append(message)
             else:
-                rejected_message = message
-                rejected_message.content = 'You are not allowed to receive this message'
-                self.topic_dic[message.topic].append(rejected_message)
+                trusted = reference_monitor_check(self.connected_cloud, self, self.admin, message.owner)
+                if trusted:
+                    self.topic_dic[message.topic].append(message)
+                else:
+                    rejected_message = message
+                    rejected_message.content = 'You are not allowed to receive this message'
+                    self.topic_dic[message.topic].append(rejected_message)
+        except:
+            self.topic_dic[message.topic].append(message)
 
     def get_latest_message(self, topic):
         return self.topic_dic[topic][-1].owner, self.topic_dic[topic][-1].topic, self.topic_dic[topic][-1].content
@@ -45,7 +48,7 @@ class Subject:
     def get_all_message(self, topic):
         message_list = []
         for message in self.topic_dic[topic]:
-            message_list.append( (message.owner, message.topic, message.content,) )
+            message_list.append( (message.owner.id, message.topic, message.content,) )
         return message_list
 
     def accident_disconnect(self, cloud):
