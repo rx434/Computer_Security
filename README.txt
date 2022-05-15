@@ -7,11 +7,15 @@ interpreter: 3.8
 
 Code structure:
 |---README.txt
+|---README-Attacks.txt
 |---object.py
 |---subject_device.py
 |---subject_user.py
 |---server.py
 |---reference_monitor.py
+|---will_message_attack.py
+|---retained_message_attack.py
+|---Non_updated_session_lifecycle_state_attack.py
 
 Explanation:
 object.py: inplement the message class in MQTT protocol
@@ -19,6 +23,10 @@ subject_device.py: inplement device class in MQTT protocol, which is allowed to 
 subject_user.py: inplement user and admin class in MQTT protocol, which is allowed to do connect, subscribe, publish and receive messages. Moreover, the admin class is inherited from user class, which has the authorties to add or remove users into or from the trust lists. 
 server.py: simulate the IoT cloud based on MQTT protocol, which is used to handle messages from subjects. 
 reference_monitor.py: inplement a reference monitor based on MQTT protocol. It will check whether an object's owner is in the trusted list stored in admin's local enviorment. 
+will_message_attack.py: Demonstrate how will message attack works and how this system prevents it.
+retained_message_attack.py: Demonstrate how retained message attack works and how this system prevents it.
+Non_updated_session_lifecycle_state_attack.py: Demonstrate how this attack works and how this system prevents it. 
+README-Attacks.txt： Detailed information of these three attacks.
 
 Installation and run (On Windows):
 1. get the zip code and unzip it.
